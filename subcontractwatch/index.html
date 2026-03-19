@@ -1,1 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SubcontractWatch — Small business procurement advisory</title>
+<meta name="description" content="SubcontractWatch identifies specific small business subcontracting opportunities within a prime contractor's actual procurement patterns — by PSC code, congressional district, and certification.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  :root {
+    --ink:    #1a1a18;
+    --paper:  #f8f7f2;
+    --rule:   #d4d2ca;
+    --muted:  #6b6960;
+    --mono:   'DM Mono', 'Courier New', monospace;
+    --serif:  'Source Serif 4', Georgia, serif;
+    --display:'Playfair Display', Georgia, serif;
+  }
+
+  html { font-size: 16px; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-weight: 300;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 2rem; }
+
+  /* ── Masthead ── */
+  header { border-bottom: 1px solid var(--rule); padding: 1.5rem 0; }
+  .masthead { display: flex; align-items: center; gap: 12px; }
+  .mark { width: 22px; height: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 2.5px; flex-shrink: 0; }
+  .mark span { display: block; background: var(--ink); }
+  .brand { font-family: var(--mono); font-weight: 400; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink); text-decoration: none; }
+  .brand-parent { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; color: var(--muted); margin-left: 4px; }
+  nav { margin-left: auto; display: flex; gap: 2rem; align-items: center; }
+  nav a { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; }
+  nav a:hover { color: var(--ink); }
+
+  /* ── Hero ── */
+  .hero { padding: 4.5rem 0 3.5rem; border-bottom: 1px solid var(--rule); }
+
+  .eyebrow { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.25rem; }
+
+  h1 { font-family: var(--display); font-weight: 600; font-size: clamp(1.8rem, 4vw, 2.75rem); line-height: 1.18; max-width: 640px; margin-bottom: 1.25rem; }
+
+  .lede { font-size: 1.05rem; color: var(--muted); max-width: 540px; margin-bottom: 2rem; line-height: 1.8; }
+
+  .btn { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 10px 22px; text-decoration: none; display: inline-block; }
+  .btn-solid { background: var(--ink); color: var(--paper); border: 1px solid var(--ink); }
+  .btn-solid:hover { background: #333; }
+  .btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--rule); }
+  .btn-outline:hover { border-color: var(--ink); }
+
+  /* ── What it is ── */
+  .what { padding: 3rem 0; border-bottom: 1px solid var(--rule); }
+
+  .section-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.5rem; }
+
+  .what-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+
+  .what-left { padding-right: 3rem; border-right: 1px solid var(--rule); }
+  .what-right { padding-left: 3rem; }
+
+  .what-left p, .what-right p { font-size: 0.95rem; color: var(--muted); line-height: 1.75; margin-bottom: 1rem; }
+  .what-left p:last-child, .what-right p:last-child { margin-bottom: 0; }
+
+  /* ── How it works ── */
+  .how { padding: 3rem 0; border-bottom: 1px solid var(--rule); }
+
+  .tier-list { margin-top: 0.5rem; }
+
+  .tier {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: 1rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+
+  .tier:last-child { border-bottom: none; }
+
+  .tier-num {
+    font-family: var(--display);
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--rule);
+    line-height: 1;
+    padding-top: 2px;
+  }
+
+  .tier-content {}
+
+  .tier-name {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .tier-badge {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1px solid var(--rule);
+    color: var(--muted);
+  }
+
+  .tier-badge.paid { border-color: var(--ink); color: var(--ink); }
+
+  .tier-desc { font-size: 0.9rem; color: var(--muted); line-height: 1.7; }
+
+  .tier-example {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-left: 2px solid var(--rule);
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ── Sample finding ── */
+  .sample { padding: 3rem 0; border-bottom: 1px solid var(--rule); }
+
+  .sample-card {
+    border: 1px solid var(--rule);
+    padding: 2rem;
+  }
+
+  .sample-card-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .sample-stat {
+    font-family: var(--display);
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .sample-desc {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .sample-hook {
+    padding: 1rem 1.25rem;
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .sample-hook-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 0.5rem;
+  }
+
+  .sample-hook-text { font-size: 0.88rem; line-height: 1.65; }
+
+  /* ── Audiences ── */
+  .audiences { padding: 3rem 0; border-bottom: 1px solid var(--rule); }
+
+  .audience-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+
+  .audience {
+    padding-right: 2rem;
+    border-right: 1px solid var(--rule);
+    margin-right: 2rem;
+  }
+
+  .audience:last-child { border-right: none; padding-right: 0; margin-right: 0; }
+
+  .audience-type {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .audience-type::before { content: ''; display: block; width: 14px; height: 1px; background: var(--rule); }
+
+  .audience p { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+
+  /* ── Contact ── */
+  .contact { padding: 3rem 0; border-bottom: 1px solid var(--rule); }
+
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+
+  .contact-copy { padding-right: 3rem; border-right: 1px solid var(--rule); }
+
+  .contact-copy h2 { font-family: var(--display); font-size: 1.6rem; font-weight: 600; line-height: 1.25; margin-bottom: 0.75rem; }
+
+  .contact-copy p { font-size: 0.9rem; color: var(--muted); line-height: 1.7; }
+
+  .contact-form { padding-left: 3rem; }
+
+  .form-group { margin-bottom: 1rem; }
+
+  .form-group label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    font-family: var(--serif);
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 8px 10px;
+    appearance: none;
+    outline: none;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--ink);
+  }
+
+  .form-group textarea { resize: vertical; min-height: 80px; }
+
+  .form-note { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.08em; color: var(--muted); margin-top: 0.6rem; line-height: 1.6; }
+
+  /* ── Footer ── */
+  footer { padding: 2rem 0; }
+  .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .footer-copy { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; color: var(--muted); }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-decoration: none; }
+  .footer-links a:hover { color: var(--ink); }
+
+  @media (max-width: 640px) {
+    nav { display: none; }
+    .what-grid, .contact-grid { grid-template-columns: 1fr; }
+    .what-left { padding-right: 0; border-right: none; border-bottom: 1px solid var(--rule); padding-bottom: 2rem; margin-bottom: 2rem; }
+    .what-right { padding-left: 0; }
+    .contact-copy { padding-right: 0; border-right: none; border-bottom: 1px solid var(--rule); padding-bottom: 2rem; margin-bottom: 2rem; }
+    .contact-form { padding-left: 0; }
+    .audience-grid { grid-template-columns: 1fr; }
+    .audience { border-right: none; padding-right: 0; margin-right: 0; border-bottom: 1px solid var(--rule); padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
+    .audience:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="masthead">
+      <div class="mark" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <a href="/" class="brand">SubcontractWatch</a>
+      <span class="brand-parent">/ Procurement Signals</span>
+      <nav>
+        <a href="#how">How it works</a>
+        <a href="#contact">Request a profile</a>
+        <a href="https://procurementsignals.net">Procurement Signals</a>
+        <a href="https://contractwatch.net">ContractWatch</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">SubcontractWatch &mdash; Procurement advisory</p>
+      <h1>What is your prime contractor actually buying — and who is selling it to them?</h1>
+      <p class="lede">SubcontractWatch analyzes a federal prime contractor's actual procurement patterns and identifies the specific small businesses — by PSC code, congressional district, and certification — that should be in their supply chain.</p>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+        <a href="#contact" class="btn btn-solid">Request a company profile</a>
+        <a href="#how" class="btn btn-outline">How it works</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="what">
+    <div class="wrap">
+      <p class="section-label">What this is — and what it isn't</p>
+      <div class="what-grid">
+        <div class="what-left">
+          <p>Federal prime contractors receiving contracts above $750,000 are required by FAR 52.219-9 to submit a subcontracting plan with specific goals for small business participation. Most do. Few have the analytical capacity to identify what they are actually buying that could be sourced from qualified small businesses in the districts where they work.</p>
+          <p>SubcontractWatch fills that gap. We analyze a prime contractor's contracts at the Product/Service Code level — the specific procurement classification that describes what is being bought, not just the broad industry category.</p>
+        </div>
+        <div class="what-right">
+          <p>This is not a matchmaking platform. SAM.gov, SBA SUBNet, and dozens of other tools list small businesses and prime contractors in the same database and hope they find each other. That is a discovery problem, and it is already solved.</p>
+          <p>The unsolved problem is specificity: which contracts, under which PSC codes, performed in which congressional districts, represent the most actionable subcontracting opportunity for a qualified small business in that geography? SubcontractWatch answers that question with USASpending and SAM.gov data — not intuition.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <div class="wrap">
+      <p class="section-label">How it works</p>
+      <div class="tier-list">
+
+        <div class="tier">
+          <div class="tier-num">1</div>
+          <div class="tier-content">
+            <p class="tier-name">
+              Company profile
+              <span class="tier-badge">Free</span>
+            </p>
+            <p class="tier-desc">We pull three years of federal contract awards for a named prime contractor from USASpending.gov — total obligations, contracting agencies, NAICS work categories, and state-level performance geography. This is the teaser: it demonstrates that we know something about their federal footprint that they may not have assembled themselves.</p>
+            <div class="tier-example">"AAR Government Services holds $2.4B in federal contracts across FY2023–2025. The dominant work is aircraft maintenance (J015) and landing gear supply (1620), performed primarily in Illinois and Florida."</div>
+          </div>
+        </div>
+
+        <div class="tier">
+          <div class="tier-num">2</div>
+          <div class="tier-content">
+            <p class="tier-name">
+              PSC-level sample
+              <span class="tier-badge">Free sample</span>
+            </p>
+            <p class="tier-desc">One specific finding from the full report, provided at no charge. This is the "tell me something I don't know" answer — a specific PSC code on a specific contract, with one matched small business in the relevant congressional district. It proves the full report has actionable specificity.</p>
+            <div class="tier-example">"Contract FA820324F0007 ($64.9M, Air Force, Wood Dale IL-08) carries PSC 1620 — Aircraft Landing Gear Components. Chronos Aviation LLC in Rockford (IL-17) is registered under PSC 1620 with an active SAM registration. That's a constituent of IL-17 in the supply chain of a contract performed in IL-08."</div>
+          </div>
+        </div>
+
+        <div class="tier">
+          <div class="tier-num">3</div>
+          <div class="tier-content">
+            <p class="tier-name">
+              Full matchmaking report
+              <span class="tier-badge paid">Paid</span>
+            </p>
+            <p class="tier-desc">The complete PSC breakdown for the prime's top contracts, matched against the SAM.gov small business registry by PSC code and congressional district. Includes firm name, UEI, CAGE, certification status (SDVOSB, 8(a), WOSB, HUBZone), and the specific contract that creates the subcontracting obligation. Delivered as a PDF and data file.</p>
+          </div>
+        </div>
+
+        <div class="tier">
+          <div class="tier-num">4</div>
+          <div class="tier-content">
+            <p class="tier-name">
+              Monthly monitoring retainer
+              <span class="tier-badge paid">Paid</span>
+            </p>
+            <p class="tier-desc">Ongoing review of new contracts won and bids in progress, flagging subcontracting opportunities as they arise. Updated SAM.gov matching when registrations change. Quarterly summary for reporting to the contracting officer's subcontracting review.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="sample">
+    <div class="wrap">
+      <p class="section-label">Sample finding — Fidelity Technologies Corporation, Reading PA</p>
+      <div class="sample-card">
+        <div class="sample-card-label">Free teaser / company profile excerpt</div>
+        <div class="sample-stat">$693M</div>
+        <p class="sample-desc">Federal contracts performed by Fidelity Technologies Corporation in Berks County, PA over FY2023–2025. Primary work: PSC J069 (Maintenance/Repair: Training Aids and Devices), performed in PA-04 under NAVSUP Fleet Logistics Center Philadelphia. All 9 J069 contracts carry Individual Subcontracting Plans under FAR 52.219-9.</p>
+        <div class="sample-hook">
+          <p class="sample-hook-label">Free sample — full report preview</p>
+          <p class="sample-hook-text">PSC J069 — Maint/Repair/Rebuild: Training Aids and Devices. $510.7M across 9 contracts, performed in PA (District 04). The full SubcontractWatch report identifies small businesses registered in SAM.gov with PSC J069 capability, located in the congressional districts where this work is performed — with their certifications (SDVOSB, 8(a), WOSB) and contact information.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="audiences">
+    <div class="wrap">
+      <p class="section-label">Who uses SubcontractWatch</p>
+      <div class="audience-grid">
+        <div class="audience">
+          <p class="audience-type">Prime contractors</p>
+          <p>Business development and small business liaison officers who need to meet subcontracting plan goals with qualified vendors — not just names in a database, but firms whose capabilities match specific contract requirements.</p>
+        </div>
+        <div class="audience">
+          <p class="audience-type">Congressional offices</p>
+          <p>Staff who want to show constituents that federal contract work in the district is generating local economic activity — and identify where it isn't. The district mapping is the deliverable.</p>
+        </div>
+        <div class="audience">
+          <p class="audience-type">Economic development</p>
+          <p>State and regional agencies tracking federal procurement flows relative to local small business capacity. SubcontractWatch identifies the gap between where federal money performs and where qualified vendors are located.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <div class="wrap">
+      <div class="contact-grid">
+        <div class="contact-copy">
+          <h2>Request a company profile</h2>
+          <p>Send us the name of a federal prime contractor and we will return a free company profile within two business days. No commitment required. If the profile is useful, we can discuss the full report.</p>
+          <p style="margin-top:1rem;">For congressional and economic development inquiries, we can scope district-level work on request.</p>
+        </div>
+        <div class="contact-form">
+          <form action="https://formspree.io/f/myknobpz" method="POST">
+            <div class="form-group">
+              <label for="name">Your name</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+              <label for="org">Organization</label>
+              <input type="text" id="org" name="organization">
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+              <label for="inquiry">Type of inquiry</label>
+              <select id="inquiry" name="inquiry_type">
+                <option value="">Select one</option>
+                <option value="prime">Prime contractor profile</option>
+                <option value="district">Congressional district analysis</option>
+                <option value="state">State economic development</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="company">Prime contractor name (if applicable)</label>
+              <input type="text" id="company" name="prime_contractor">
+            </div>
+            <div class="form-group">
+              <label for="notes">Notes</label>
+              <textarea id="notes" name="notes"></textarea>
+            </div>
+            <button type="submit" class="btn btn-solid" style="width:100%;text-align:center;cursor:pointer;">Submit request</button>
+            <p class="form-note">Free company profiles returned within two business days. We do not sell or share contact information.</p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-inner">
+      <span class="footer-copy">&copy; 2026 Procurement Signals &middot; subcontractwatch.net</span>
+      <div class="footer-links">
+        <a href="https://procurementsignals.net">Procurement Signals</a>
+        <a href="https://contractwatch.net">ContractWatch</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
