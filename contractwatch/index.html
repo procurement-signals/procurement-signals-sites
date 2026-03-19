@@ -1,1 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ContractWatch — Federal procurement intelligence</title>
+<meta name="description" content="ContractWatch tracks shifts in federal contract spending. Changes in what agencies buy — and how — signal policy changes before any press release catches up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #1a1a18;
+    --paper:  #f8f7f2;
+    --rule:   #d4d2ca;
+    --muted:  #6b6960;
+    --mono:   'DM Mono', 'Courier New', monospace;
+    --serif:  'Source Serif 4', Georgia, serif;
+    --display:'Playfair Display', Georgia, serif;
+  }
+
+  html { font-size: 16px; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-weight: 300;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 2rem; }
+
+  /* ── Masthead ── */
+  header { border-bottom: 1px solid var(--rule); padding: 1.5rem 0; }
+
+  .masthead { display: flex; align-items: center; gap: 12px; }
+
+  .mark {
+    width: 22px; height: 22px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 2.5px; flex-shrink: 0;
+  }
+  .mark span { display: block; background: var(--ink); }
+
+  .brand {
+    font-family: var(--mono); font-weight: 400;
+    font-size: 0.72rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--ink); text-decoration: none;
+  }
+
+  .brand-parent {
+    font-family: var(--mono); font-size: 0.6rem;
+    letter-spacing: 0.1em; color: var(--muted); margin-left: 4px;
+  }
+
+  nav { margin-left: auto; display: flex; gap: 2rem; align-items: center; }
+
+  nav a {
+    font-family: var(--mono); font-size: 0.65rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); text-decoration: none;
+  }
+
+  nav a:hover { color: var(--ink); }
+  nav a.current { color: var(--ink); }
+
+  /* ── Hero ── */
+  .hero { padding: 4.5rem 0 3.5rem; border-bottom: 1px solid var(--rule); }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 0.65rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 1.25rem;
+  }
+
+  h1 {
+    font-family: var(--display); font-weight: 600;
+    font-size: clamp(1.8rem, 4vw, 2.75rem);
+    line-height: 1.18; max-width: 640px; margin-bottom: 1.25rem;
+  }
+
+  .lede {
+    font-size: 1.05rem; color: var(--muted);
+    max-width: 540px; margin-bottom: 2rem; line-height: 1.8;
+  }
+
+  .btn {
+    font-family: var(--mono); font-size: 0.7rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 10px 22px; text-decoration: none; display: inline-block;
+  }
+
+  .btn-solid { background: var(--ink); color: var(--paper); border: 1px solid var(--ink); }
+  .btn-solid:hover { background: #333; }
+  .btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--rule); }
+  .btn-outline:hover { border-color: var(--ink); }
+
+  /* ── Editorial philosophy ── */
+  .philosophy { padding: 3rem 0; border-bottom: 1px solid var(--rule); }
+
+  .section-label {
+    font-family: var(--mono); font-size: 0.65rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 1.5rem;
+  }
+
+  .philosophy-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .philosophy-text { padding-right: 3rem; border-right: 1px solid var(--rule); }
+
+  .philosophy-text p {
+    font-size: 0.95rem; color: var(--muted);
+    line-height: 1.75; margin-bottom: 1rem;
+  }
+
+  .philosophy-pillars { padding-left: 3rem; }
+
+  .pillar { margin-bottom: 1.5rem; }
+  .pillar:last-child { margin-bottom: 0; }
+
+  .pillar-name {
+    font-family: var(--mono); font-size: 0.65rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink); margin-bottom: 0.4rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .pillar-name::before {
+    content: ''; display: block;
+    width: 14px; height: 1px; background: var(--ink);
+  }
+
+  .pillar p { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+
+  /* ── Issues ── */
+  .issues { padding: 3rem 0; border-bottom: 1px solid var(--rule); }
+
+  .issue-row {
+    display: flex; align-items: baseline;
+    gap: 1.5rem; padding: 1.25rem 0;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none; color: inherit;
+  }
+
+  .issue-row:first-of-type { border-top: 1px solid var(--rule); }
+  .issue-row:hover .issue-title { text-decoration: underline; }
+
+  .issue-num {
+    font-family: var(--mono); font-size: 0.65rem;
+    letter-spacing: 0.1em; color: var(--muted);
+    flex-shrink: 0; width: 3.5rem;
+  }
+
+  .issue-date {
+    font-family: var(--mono); font-size: 0.65rem;
+    letter-spacing: 0.08em; color: var(--muted);
+    flex-shrink: 0; width: 7rem;
+  }
+
+  .issue-title {
+    font-family: var(--display); font-size: 1rem;
+    font-weight: 400; line-height: 1.35; flex: 1;
+  }
+
+  .issue-tag {
+    font-family: var(--mono); font-size: 0.6rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); flex-shrink: 0;
+  }
+
+  .issue-forthcoming { color: var(--muted); font-style: italic; }
+
+  /* ── Subscribe ── */
+  .subscribe { padding: 3rem 0; border-bottom: 1px solid var(--rule); }
+
+  .subscribe-inner {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0; align-items: start;
+  }
+
+  .subscribe-copy { padding-right: 3rem; border-right: 1px solid var(--rule); }
+
+  .subscribe-copy h2 {
+    font-family: var(--display); font-size: 1.6rem;
+    font-weight: 600; line-height: 1.25; margin-bottom: 0.75rem;
+  }
+
+  .subscribe-copy p { font-size: 0.9rem; color: var(--muted); line-height: 1.7; }
+
+  .subscribe-form { padding-left: 3rem; }
+
+  .subscribe-form p {
+    font-size: 0.85rem; color: var(--muted);
+    line-height: 1.65; margin-bottom: 1.5rem;
+  }
+
+  .form-note {
+    font-family: var(--mono); font-size: 0.6rem;
+    letter-spacing: 0.08em; color: var(--muted);
+    margin-top: 0.75rem; line-height: 1.6;
+  }
+
+  /* ── Footer ── */
+  footer { padding: 2rem 0; }
+
+  .footer-inner {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem;
+  }
+
+  .footer-copy {
+    font-family: var(--mono); font-size: 0.6rem;
+    letter-spacing: 0.1em; color: var(--muted);
+  }
+
+  .footer-links { display: flex; gap: 1.5rem; }
+
+  .footer-links a {
+    font-family: var(--mono); font-size: 0.6rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); text-decoration: none;
+  }
+
+  .footer-links a:hover { color: var(--ink); }
+
+  @media (max-width: 640px) {
+    nav { display: none; }
+    .philosophy-grid, .subscribe-inner { grid-template-columns: 1fr; }
+    .philosophy-text { padding-right: 0; border-right: none; border-bottom: 1px solid var(--rule); padding-bottom: 2rem; margin-bottom: 2rem; }
+    .philosophy-pillars { padding-left: 0; }
+    .subscribe-copy { padding-right: 0; border-right: none; border-bottom: 1px solid var(--rule); padding-bottom: 2rem; margin-bottom: 2rem; }
+    .subscribe-form { padding-left: 0; }
+    .issue-date, .issue-tag { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="masthead">
+      <div class="mark" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <a href="/" class="brand">ContractWatch</a>
+      <span class="brand-parent">/ Procurement Signals</span>
+      <nav>
+        <a href="/" class="current">Issues</a>
+        <a href="/about.html">About</a>
+        <a href="https://procurementsignals.net">Procurement Signals</a>
+        <a href="https://subcontractwatch.net">SubcontractWatch</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">ContractWatch &mdash; Issue 1</p>
+      <h1>When Sole-Source Makes Sense — and When It Doesn't</h1>
+      <p class="lede">Four contracts that reveal how agencies use — and misuse — the "only one source" exception. One icebreaker, one training contract, one prison, and one telecom deal that keeps renewing.</p>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+        <a href="https://contractwatch.substack.com/p/issue-1" class="btn btn-solid">Read Issue 1</a>
+        <a href="#subscribe" class="btn btn-outline">Subscribe</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="philosophy">
+    <div class="wrap">
+      <p class="section-label">Editorial approach</p>
+      <div class="philosophy-grid">
+        <div class="philosophy-text">
+          <p>Federal spending is the most reliable record of what any government actually does. Changes in spending signal the difference between where an administration is and where it wants to be.</p>
+          <p>ContractWatch reads those signals. Each issue examines a pattern in federal contract data — an agency that is buying differently, a contractor whose awards don't match its competition, a procurement method that doesn't fit its justification.</p>
+          <p>We are analytical and non-partisan. The data is public. The patterns are real.</p>
+        </div>
+        <div class="philosophy-pillars">
+          <div class="pillar">
+            <p class="pillar-name">Signal</p>
+            <p>Spending reveals unstated priorities before announcements. Arctic Security Cutters. Border real estate. Force structure shifts.</p>
+          </div>
+          <div class="pillar">
+            <p class="pillar-name">Accountability</p>
+            <p>Spending continues despite documented concerns. The VA Oracle EHRM system. Contracts that survive negative GAO findings.</p>
+          </div>
+          <div class="pillar">
+            <p class="pillar-name">Compliance</p>
+            <p>Procurement method doesn't fit justification. Sole-source awards on planned multi-year enterprise programs.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="issues">
+    <div class="wrap">
+      <p class="section-label">Issues</p>
+
+      <a href="https://contractwatch.substack.com/p/issue-1" class="issue-row">
+        <span class="issue-num">No. 1</span>
+        <span class="issue-date">March 2026</span>
+        <span class="issue-title">When Sole-Source Makes Sense — and When It Doesn't</span>
+        <span class="issue-tag">Compliance</span>
+      </a>
+
+      <div class="issue-row" style="cursor:default;">
+        <span class="issue-num">No. 2</span>
+        <span class="issue-date">Forthcoming</span>
+        <span class="issue-title issue-forthcoming">Arctic Security Cutters and the $1.44B Commitment That Preceded Any Announcement</span>
+        <span class="issue-tag">Signal</span>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="subscribe" id="subscribe">
+    <div class="wrap">
+      <div class="subscribe-inner">
+        <div class="subscribe-copy">
+          <h2>Read ContractWatch</h2>
+          <p>Published on Substack. Free issues track spending signals. Paid subscribers receive full data methodology, source documentation, and early access to findings before publication.</p>
+        </div>
+        <div class="subscribe-form">
+          <p>ContractWatch is hosted on Substack. Subscribe there to receive issues by email and access the full archive.</p>
+          <a href="https://contractwatch.substack.com" class="btn btn-solid" style="width:100%;text-align:center;display:block;">Subscribe on Substack</a>
+          <p class="form-note">
+            Free tier: public issues, no billing required.<br>
+            Paid tier: source documentation, underlying data, and methodology notes for each issue.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-inner">
+      <span class="footer-copy">&copy; 2026 Procurement Signals &middot; contractwatch.net</span>
+      <div class="footer-links">
+        <a href="https://procurementsignals.net">Procurement Signals</a>
+        <a href="https://subcontractwatch.net">SubcontractWatch</a>
+        <a href="/about.html">About</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
 
