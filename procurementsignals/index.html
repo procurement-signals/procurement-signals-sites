@@ -1,1 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procurement Signals — Intelligence from the public record</title>
+<meta name="description" content="Procurement Signals reads federal spending as a primary source. Two products: ContractWatch for oversight intelligence, SubcontractWatch for procurement advisory.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  :root {
+    --ink:    #1a1a18;
+    --paper:  #f8f7f2;
+    --rule:   #d4d2ca;
+    --muted:  #6b6960;
+    --mono:   'DM Mono', 'Courier New', monospace;
+    --serif:  'Source Serif 4', Georgia, serif;
+    --display:'Playfair Display', Georgia, serif;
+  }
+
+  html { font-size: 16px; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-weight: 300;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* ── Masthead ── */
+  header {
+    border-bottom: 1px solid var(--rule);
+    padding: 1.5rem 0;
+  }
+
+  .masthead {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mark {
+    width: 26px;
+    height: 26px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+
+  .mark span {
+    display: block;
+    background: var(--ink);
+  }
+
+  .brand {
+    font-family: var(--mono);
+    font-weight: 400;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  nav {
+    margin-left: auto;
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  nav a {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  nav a:hover { color: var(--ink); }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 5rem 0 4rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    line-height: 1.15;
+    max-width: 700px;
+    margin-bottom: 1.5rem;
+  }
+
+  .lede {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 560px;
+    margin-bottom: 2.5rem;
+    line-height: 1.8;
+  }
+
+  .btn-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+  .btn {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 10px 22px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .btn-solid {
+    background: var(--ink);
+    color: var(--paper);
+    border: 1px solid var(--ink);
+  }
+
+  .btn-solid:hover { background: #333; }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--rule);
+  }
+
+  .btn-outline:hover { border-color: var(--ink); }
+
+  /* ── Products ── */
+  .products {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .product {
+    padding: 3rem 0;
+  }
+
+  .product:first-child {
+    padding-right: 3rem;
+    border-right: 1px solid var(--rule);
+  }
+
+  .product:last-child { padding-left: 3rem; }
+
+  .product-type {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .product-type::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .product h2 {
+    font-family: var(--display);
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+  }
+
+  .product p {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.75;
+    margin-bottom: 1.5rem;
+  }
+
+  .product-link {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .product-link::after { content: '→'; }
+  .product-link:hover gap { gap: 12px; }
+
+  .product-for {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    line-height: 1.9;
+  }
+
+  .product-for strong {
+    color: var(--ink);
+    font-weight: 400;
+  }
+
+  /* ── Method ── */
+  .method {
+    padding: 3.5rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  blockquote {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    line-height: 1.65;
+    max-width: 660px;
+    border-left: 2px solid var(--ink);
+    padding-left: 1.5rem;
+  }
+
+  /* ── Findings ── */
+  .findings {
+    padding: 3rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .finding-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+
+  .finding {
+    padding-right: 2.5rem;
+    border-right: 1px solid var(--rule);
+    margin-right: 2.5rem;
+  }
+
+  .finding:last-child {
+    border-right: none;
+    padding-right: 0;
+    margin-right: 0;
+  }
+
+  .finding-stat {
+    font-family: var(--display);
+    font-size: 2.25rem;
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 0.6rem;
+  }
+
+  .finding-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ── Footer ── */
+  footer {
+    padding: 2rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-copy {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .footer-links a {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .footer-links a:hover { color: var(--ink); }
+
+  /* ── Responsive ── */
+  /* ── Live stats bar ── */
+  .stats-bar {
+    border-bottom: 1px solid var(--rule);
+    padding: 0.85rem 0;
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .stats-inner {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+
+  .stat-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0 2rem 0 0;
+    margin-right: 2rem;
+    border-right: 1px solid rgba(255,255,255,0.15);
+    flex-shrink: 0;
+  }
+
+  .stat-item:last-of-type {
+    border-right: none;
+    padding-right: 0;
+    margin-right: 0;
+  }
+
+  .stat-num {
+    font-family: var(--display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--paper);
+    line-height: 1;
+    min-width: 4ch;
+  }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.4;
+  }
+
+  .stat-period {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .stat-loading {
+    opacity: 0.4;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.15; }
+  }
+
+  @media (max-width: 640px) {
+    nav { display: none; }
+
+    .products {
+      grid-template-columns: 1fr;
+    }
+
+    .product:first-child {
+      padding-right: 0;
+      border-right: none;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 2.5rem;
+    }
+
+    .product:last-child {
+      padding-left: 0;
+      padding-top: 2.5rem;
+    }
+
+    .finding-grid { grid-template-columns: 1fr; }
+
+    .finding {
+      border-right: none;
+      border-bottom: 1px solid var(--rule);
+      padding-right: 0;
+      margin-right: 0;
+      padding-bottom: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .finding:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="masthead">
+      <div class="mark" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <a href="/" class="brand">Procurement Signals</a>
+      <nav>
+        <a href="https://contractwatch.net">ContractWatch</a>
+        <a href="https://subcontractwatch.net">SubcontractWatch</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<div class="stats-bar" id="stats-bar">
+  <div class="wrap">
+    <div class="stats-inner">
+      <div class="stat-item">
+        <span class="stat-num stat-loading" id="stat-contracts">&#8212;</span>
+        <span class="stat-label">contracts<br>awarded</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num stat-loading" id="stat-value">&#8212;</span>
+        <span class="stat-label">obligated<br>value</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num stat-loading" id="stat-vendors">&#8212;</span>
+        <span class="stat-label">distinct<br>contractors</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num stat-loading" id="stat-agencies">&#8212;</span>
+        <span class="stat-label">awarding<br>agencies</span>
+      </div>
+      <span class="stat-period" id="stat-period">Loading&hellip;</span>
+    </div>
+  </div>
+</div>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Procurement Signals — Intelligence from the public record</p>
+      <h1>Federal spending is the most reliable record of what any government actually does.</h1>
+      <p class="lede">Press briefings describe intentions. Budgets describe plans. Contracts describe commitments. Procurement Signals reads the commitments.</p>
+      <div class="btn-row">
+        <a href="https://contractwatch.net" class="btn btn-solid">Read ContractWatch</a>
+        <a href="https://subcontractwatch.net" class="btn btn-outline">SubcontractWatch services</a>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="products">
+        <div class="product">
+          <p class="product-type">Intelligence product</p>
+          <h2>ContractWatch</h2>
+          <p>A newsletter tracking shifts in federal contract spending. When agencies change what they buy — and how — it signals changes in actual policy before any press release catches up.</p>
+          <a href="https://contractwatch.net" class="product-link">Read ContractWatch</a>
+          <div class="product-for">
+            <strong>For</strong> policy researchers &middot; compliance officers<br>
+            investigative journalists &middot; GovCon due diligence
+          </div>
+        </div>
+        <div class="product">
+          <p class="product-type">Advisory service</p>
+          <h2>SubcontractWatch</h2>
+          <p>A procurement advisory service for federal prime contractors and the political offices that represent their supply chains. Identifies specific small business subcontracting opportunities by PSC code, district, and certification.</p>
+          <a href="https://subcontractwatch.net" class="product-link">Request a profile</a>
+          <div class="product-for">
+            <strong>For</strong> prime contractor BD teams &middot; SBLO officers<br>
+            congressional offices &middot; economic development agencies
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="method">
+    <div class="wrap">
+      <p class="section-label">Methodology</p>
+      <blockquote>
+        "Changes in spending signal the difference between where an administration is and where it wants to be. For the compliance market, these shifts may or may not fit with the policies they've been given."
+      </blockquote>
+    </div>
+  </section>
+
+  <section class="findings">
+    <div class="wrap">
+      <p class="section-label">From the data</p>
+      <div class="finding-grid">
+        <div class="finding">
+          <div class="finding-stat">$1.44B</div>
+          <div class="finding-desc">DHS FY2026 Q1 surge — two Arctic Security Cutter contracts issued in five days before any public announcement.</div>
+        </div>
+        <div class="finding">
+          <div class="finding-stat">$49.8B</div>
+          <div class="finding-desc">VA Oracle EHRM lifecycle estimate. 58% of clinicians report increased patient safety risks. 16 of 18 GAO recommendations unimplemented.</div>
+        </div>
+        <div class="finding">
+          <div class="finding-stat">$693M</div>
+          <div class="finding-desc">Federal contracts performed in Berks County, PA by a company most residents have never heard of — with subcontracting obligations no local firm is filling.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;width:100%;flex-wrap:wrap;gap:1rem;">
+    <span class="footer-copy">&copy; 2026 Procurement Signals &middot; procurementsignals.net</span>
+    <div class="footer-links">
+      <a href="https://contractwatch.net">ContractWatch</a>
+      <a href="https://subcontractwatch.net">SubcontractWatch</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  var now = new Date();
+  var end = now.toISOString().slice(0, 10);
+  var start = new Date(now - 30 * 864e5).toISOString().slice(0, 10);
+
+  var url = 'https://api.usaspending.gov/api/v2/search/spending_by_award/';
+  var payload = {
+    filters: {
+      award_type_codes: ['A','B','C','D'],
+      time_period: [{ start_date: start, end_date: end }]
+    },
+    fields: ['Award ID', 'Award Amount', 'Awarding Agency', 'Recipient Name'],
+    limit: 1,
+    page: 1,
+    sort: 'Award Amount',
+    order: 'desc',
+    subawards: false
+  };
+
+  function fmt(n) {
+    if (n >= 1e12) return '$' + (n / 1e12).toFixed(2) + 'T';
+    if (n >= 1e9)  return '$' + (n / 1e9).toFixed(1) + 'B';
+    if (n >= 1e6)  return '$' + (n / 1e6).toFixed(0) + 'M';
+    return '$' + n.toLocaleString();
+  }
+
+  function fmtN(n) {
+    if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(0) + 'K';
+    return n.toLocaleString();
+  }
+
+  function setEl(id, val) {
+    var el = document.getElementById(id);
+    if (el) { el.textContent = val; el.classList.remove('stat-loading'); }
+  }
+
+  function fmtDate(d) {
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[d.getMonth()] + ' ' + d.getDate();
+  }
+
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var total = data.page_metadata && data.page_metadata.total ? data.page_metadata.total : '—';
+
+    // Second call: get spending totals
+    return fetch('https://api.usaspending.gov/api/v2/search/spending_by_category/awarding_agency/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        filters: {
+          award_type_codes: ['A','B','C','D'],
+          time_period: [{ start_date: start, end_date: end }]
+        },
+        limit: 100,
+        page: 1
+      })
+    })
+    .then(function(r2) { return r2.json(); })
+    .then(function(data2) {
+      var agencies = data2.results ? data2.results.length : '—';
+      var totalObl = data2.results
+        ? data2.results.reduce(function(s, a) { return s + (a.obligated_amount || a.amount || 0); }, 0)
+        : 0;
+
+      setEl('stat-contracts', typeof total === 'number' ? fmtN(total) : total);
+      setEl('stat-value',     totalObl > 0 ? fmt(totalObl) : '—');
+      setEl('stat-agencies',  typeof agencies === 'number' ? agencies : agencies);
+
+      // Third call: recipient count
+      return fetch('https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filters: {
+            award_type_codes: ['A','B','C','D'],
+            time_period: [{ start_date: start, end_date: end }]
+          },
+          limit: 1,
+          page: 1
+        })
+      })
+      .then(function(r3) { return r3.json(); })
+      .then(function(data3) {
+        var recipients = data3.page_metadata && data3.page_metadata.total
+          ? data3.page_metadata.total : '—';
+        setEl('stat-vendors', typeof recipients === 'number' ? fmtN(recipients) : recipients);
+
+        var startD = new Date(start + 'T00:00:00');
+        var endD   = new Date(end   + 'T00:00:00');
+        setEl('stat-period',
+          'USASpending.gov · ' + fmtDate(startD) + '–' + fmtDate(endD));
+      });
+    });
+  })
+  .catch(function(err) {
+    var el = document.getElementById('stat-period');
+    if (el) el.textContent = 'Live data temporarily unavailable';
+    ['stat-contracts','stat-value','stat-vendors','stat-agencies'].forEach(function(id) {
+      var e = document.getElementById(id);
+      if (e) { e.textContent = '—'; e.classList.remove('stat-loading'); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
