@@ -641,7 +641,7 @@
   var p4 = post(
     'https://api.usaspending.gov/api/v2/search/spending_by_award/',
     { filters: filters,
-      fields: ['Award ID'],
+        fields: ['Award ID', 'Award Amount'],
       limit: 100, page: 1,
       //sort: 'Award Amount', order: 'desc',
       subawards: false }
