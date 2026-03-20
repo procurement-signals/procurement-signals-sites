@@ -448,8 +448,8 @@
       <nav>
         <a href="https://contractwatch.net">ContractWatch</a>
         <a href="https://subcontractwatch.net">SubcontractWatch</a>
-        <a href="/about.html">About</a>
-        <a href="/contact.html">Contact</a>
+        <a href="#about">About</a>
+        <a href="mailto:jeff-griffith@procurementsignals.net">Contact</a>
       </nav>
     </div>
   </div>
@@ -519,7 +519,7 @@
     </div>
   </section>
 
-  <section class="method">
+  <section class="method" id="about">
     <div class="wrap">
       <p class="section-label">Methodology</p>
       <blockquote>
@@ -551,33 +551,24 @@
 
 <footer>
   <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;width:100%;flex-wrap:wrap;gap:1rem;">
-    <span class="footer-copy">&copy; 2026 Procurement Signals &middot; procurementsignals.net</span>
+    <span class="footer-copy">&copy; 2026 Procurement Signals &middot; <a href="mailto:jeff-griffith@procurementsignals.net" style="color:inherit;text-decoration:none;">jeff-griffith@procurementsignals.net</a></span>
     <div class="footer-links">
       <a href="https://contractwatch.net">ContractWatch</a>
       <a href="https://subcontractwatch.net">SubcontractWatch</a>
-      <a href="/contact.html">Contact</a>
+      <a href="mailto:jeff-griffith@procurementsignals.net">Contact</a>
     </div>
   </div>
 </footer>
 
 <script>
+<script>
 (function() {
   var now = new Date();
   var end = now.toISOString().slice(0, 10);
   var start = new Date(now - 30 * 864e5).toISOString().slice(0, 10);
-
-  var url = 'https://api.usaspending.gov/api/v2/search/spending_by_award/';
-  var payload = {
-    filters: {
-      award_type_codes: ['A','B','C','D'],
-      time_period: [{ start_date: start, end_date: end }]
-    },
-    fields: ['Award ID', 'Award Amount', 'Awarding Agency', 'Recipient Name'],
-    limit: 1,
-    page: 1,
-    sort: 'Award Amount',
-    order: 'desc',
-    subawards: false
+  var filters = {
+    award_type_codes: ['A','B','C','D'],
+    time_period: [{ start_date: start, end_date: end }]
   };
 
   function fmt(n) {
@@ -603,74 +594,88 @@
     return months[d.getMonth()] + ' ' + d.getDate();
   }
 
-  fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    var total = data.page_metadata && data.page_metadata.total ? data.page_metadata.total : '—';
-
-    // Second call: get spending totals
-    return fetch('https://api.usaspending.gov/api/v2/search/spending_by_category/awarding_agency/', {
+  function post(url, body) {
+    return fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        filters: {
-          award_type_codes: ['A','B','C','D'],
-          time_period: [{ start_date: start, end_date: end }]
-        },
-        limit: 100,
-        page: 1
-      })
-    })
-    .then(function(r2) { return r2.json(); })
-    .then(function(data2) {
-      var agencies = data2.results ? data2.results.length : '—';
-      var totalObl = data2.results
-        ? data2.results.reduce(function(s, a) { return s + (a.obligated_amount || a.amount || 0); }, 0)
-        : 0;
+      body: JSON.stringify(body)
+    }).then(function(r) { return r.json(); });
+  }
 
-      setEl('stat-contracts', typeof total === 'number' ? fmtN(total) : total);
-      setEl('stat-value',     totalObl > 0 ? fmt(totalObl) : '—');
-      setEl('stat-agencies',  typeof agencies === 'number' ? agencies : agencies);
+  // Call 1: spending_over_time — gives us obligated value AND
+  // transaction count in one shot (transactions = contract actions)
+  var p1 = post(
+    'https://api.usaspending.gov/api/v2/search/spending_over_time/',
+    { group: 'fiscal_year', filters: filters,
+      spending_level: 'transactions' }
+  ).then(function(d) {
+    var obl = 0, txn = 0;
+    if (d.results) {
+      d.results.forEach(function(r) { obl += (r.aggregated_amount || 0); });
+    }
+    // spending_over_time doesn't give a transaction count directly —
+    // use the award count from spending_by_award with limit:1 for hasNext logic
+    return obl;
+  });
 
-      // Third call: recipient count
-      return fetch('https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          filters: {
-            award_type_codes: ['A','B','C','D'],
-            time_period: [{ start_date: start, end_date: end }]
-          },
-          limit: 1,
-          page: 1
-        })
-      })
-      .then(function(r3) { return r3.json(); })
-      .then(function(data3) {
-        var recipients = data3.page_metadata && data3.page_metadata.total
-          ? data3.page_metadata.total : '—';
-        setEl('stat-vendors', typeof recipients === 'number' ? fmtN(recipients) : recipients);
+  // Call 2: awarding_agency — gives agency count + we use obl from Call 1
+  var p2 = post(
+    'https://api.usaspending.gov/api/v2/search/spending_by_category/awarding_agency/',
+    { filters: filters, limit: 100, page: 1 }
+  ).then(function(d) {
+    return {
+      agencies: d.results ? d.results.length : 0
+    };
+  });
 
-        var startD = new Date(start + 'T00:00:00');
-        var endD   = new Date(end   + 'T00:00:00');
-        setEl('stat-period',
-          'USASpending.gov · ' + fmtDate(startD) + '–' + fmtDate(endD));
-      });
-    });
-  })
-  .catch(function(err) {
+  // Call 3: recipient — limit 100, use count + "+" if hasNext
+  var p3 = post(
+    'https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/',
+    { filters: filters, limit: 100, page: 1 }
+  ).then(function(d) {
+    var n = d.results ? d.results.length : 0;
+    var more = d.page_metadata && d.page_metadata.hasNext;
+    return more ? fmtN(n) + '+' : fmtN(n);
+  });
+
+  // Call 4: spending_by_award with limit:1 — use hasNext to show "X+" for contracts
+  var p4 = post(
+    'https://api.usaspending.gov/api/v2/search/spending_by_award/',
+    { filters: filters,
+      fields: ['Award ID'],
+      limit: 100, page: 1,
+      sort: 'Award Amount', order: 'desc',
+      subawards: false }
+  ).then(function(d) {
+    var n = d.results ? d.results.length : 0;
+    var more = d.page_metadata && d.page_metadata.hasNext;
+    return more ? fmtN(n) + '+' : fmtN(n);
+  });
+
+  Promise.all([p1, p2, p3, p4]).then(function(vals) {
+    var obl     = vals[0];
+    var agency  = vals[1];
+    var vendors = vals[2];
+    var contracts = vals[3];
+
+    setEl('stat-contracts', contracts);
+    setEl('stat-value',     obl > 0 ? fmt(obl) : '—');
+    setEl('stat-agencies',  agency.agencies || '—');
+    setEl('stat-vendors',   vendors);
+
+    var startD = new Date(start + 'T00:00:00');
+    var endD   = new Date(end   + 'T00:00:00');
+    setEl('stat-period', 'USASpending.gov \u00b7 ' + fmtDate(startD) + '\u2013' + fmtDate(endD));
+  }).catch(function() {
     var el = document.getElementById('stat-period');
     if (el) el.textContent = 'Live data temporarily unavailable';
     ['stat-contracts','stat-value','stat-vendors','stat-agencies'].forEach(function(id) {
       var e = document.getElementById(id);
-      if (e) { e.textContent = '—'; e.classList.remove('stat-loading'); }
+      if (e) { e.textContent = '\u2014'; e.classList.remove('stat-loading'); }
     });
   });
 })();
 </script>
 </body>
 </html>
+
